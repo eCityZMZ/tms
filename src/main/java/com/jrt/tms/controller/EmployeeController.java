@@ -8,6 +8,7 @@ import com.jrt.tms.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -79,6 +80,7 @@ public class EmployeeController {
      * @param employee
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     @PostMapping
     public R<String> save(HttpServletRequest request, @RequestBody Employee employee) {
         log.info("新增员工，员工信息：{}", employee.toString());
@@ -113,7 +115,7 @@ public class EmployeeController {
         log.info("page = {},pageSize = {},name = {}", page, pageSize, name);
 
         //构造分页构造器
-        Page pageInfo = new Page(page, pageSize);
+        Page<Employee> pageInfo = new Page(page, pageSize);
 
         //构造条件构造器
         LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper();
@@ -134,6 +136,7 @@ public class EmployeeController {
      * @param employee
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     @PutMapping
     public R<String> update(HttpServletRequest request, @RequestBody Employee employee) {
         log.info(employee.toString());
@@ -163,4 +166,8 @@ public class EmployeeController {
         }
         return R.error("没有查询到对应员工信息");
     }
+
+
+
+
 }

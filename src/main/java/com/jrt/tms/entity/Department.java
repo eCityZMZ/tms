@@ -3,36 +3,26 @@ package com.jrt.tms.entity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
+
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 /**
- * 员工实体
+ * 部门实体类
  */
 @Data
-public class Employee implements Serializable {
+public class Department implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private Long id;
 
-    private String username;
+    private Long deptCode;
 
-    private String name;
+    private String deptName;
 
-    private String password;
-
-    private String phone;
-
-    private String sex;
-
-    private String idNumber;//身份证号码
-
-    private Long roleId;
-
-    private Long deptId;
-
-    private Integer status;
+    private Integer isDeleted;
 
     @TableField(fill = FieldFill.INSERT) //插入时填充字段
     private LocalDateTime createTime;
