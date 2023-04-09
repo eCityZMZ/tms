@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Document</title>
+    <!-- 引入样式 -->
+    <link href="../../plugins/element-ui/index.css" rel="stylesheet"/>
+    <link href="../../styles/common.css" rel="stylesheet"/>
+    <link href="../../styles/page.css" rel="stylesheet"/>
+    <style>
+        #member-app .notAdmin::after {
+            border: 0 !important;
+
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-container" id="member-app">
+    <div class="container" >
+        <div class="tableBar" style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center;">
+                <el-select placeholder="请选择搜索条件" v-model="selectedCondition" style="margin-right: 10px; width: 120px;">
+                    <el-option :key="item.value" :label="item.label" :value="item.value" v-for="item in conditions">
+                        <span>{{ item.label }}</span>
+                    </el-option>
+                </el-select>
+                <el-input placeholder="请输入搜索关键字" v-model="searchKeyword" style="width: 250px;"></el-input>
+                <el-button @click="handleQuery" type="primary">搜索</el-button>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <el-button @click="exportDriver" type="primary">导出 Excel</el-button>
+                <el-button @click="addDriverHandle('add')" type="primary">+ 添加驾驶员</el-button>
+            </div>
+        </div>
+
+        <el-table
+                :data="tableData"
+                class="tableBox"
+                stripe
+        >
+            <el-table-column
+                    label="驾驶员姓名"
+                    prop="name"
+            ></el-table-column>
+            <el-table-column
+                    label="身份证账号码"
+                    prop="idNumber"
+            ></el-table-column>
+            <el-table-column
+                    label="手机号"
+                    prop="phone"
+            ></el-table-column>
+            <el-table-column
+                    label="车牌号"
+                    prop="vehicleId"
+            ></el-table-column>
+
+            <el-table-column
+                    align="center"
+                    label="操作"
+                    width="160"
+            >
+                <template slot-scope="scope">
+                    <el-button
+                            :class="{notAdmin:user !== 'admin'}"
+                            @click="addDriverHandle(scope.row.id)"
+                            class="bianji"
+                            type="text"
+                    >
+                        编辑
+                    </el-button>
+                </template>
+            </el-table-column
+            >
+        </el-table>
+        <el-pagination
+                :current-page.sync="page"
+                :page-size="pageSize"
+                :page-sizes="[10,30,50]"
+                :total="counts"
+                @current-change="handleCurrentChange"
+                @size-change="handleSizeChange"
+                class="pageList"
+                layout="total, sizes, prev, pager, next, jumper"
+        ></el-pagination>
+    </div>
+</div>
+<!-- 开发环境版本，包含了有帮助的命令行警告 -->
+<script src="../../plugins/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../plugins/element-ui/index.js"></script>
+<!-- 引入axios -->
+<script src="../../plugins/axios/axios.min.js"></script>
+<script src="../../js/request.js"></script>
+<script src="../../api/driver.js"></script>
+<script>
+    new Vue({
+        el: '#member-app',
+        data() {
+            return {
+                selectedCondition: '',
+                searchKeyword: '',
+                conditions: [
+                    {value: 'name', label: '姓名'},
+                    {value: 'phone', label: '电话'},
+                    {value: 'idNumber', label: '身份证号码'},
+                    {value: 'vehicleId',label: '车牌号'}
+                ],
+                input: '',
+                counts: 0,
+                page: 1,
+                pageSize: 10,
+                tableData: [],
+                id: '',
+                status: '',
+            }
+        },
+        computed: {},
+        created() {
+            this.init()
+            this.user = JSON.parse(localStorage.getItem('userInfo')).username
+        },
+        mounted() {
+        },
+        methods: {
+            async init() {
+                const params = {
+                    page: this.page,
+                    pageSize: this.pageSize,
+                    [this.selectedCondition]: this.searchKeyword.trim() || undefined,
+                }
+                await getMemberList(params).then(res => {
+                    if (String(res.code) === '1') {
+                        this.tableData = res.data.records || []
+                        this.counts = res.data.total
+                    }
+                }).catch(err => {
+                    this.$message.error('请求出错了：' + err)
+                })
+            },
+            handleQuery() {
+                this.page = 1;
+                this.init();
+            },
+            // 添加
+            addDriverHandle(st) {
+                if (st === 'add') {
+                    window.parent.menuHandle({
+                        id: '2',
+                        url: '/backend/page/driver/add.html',
+                        name: '添加驾驶员'
+                    }, true)
+                } else {
+                    window.parent.menuHandle({
+                        id: '2',
+                        url: '/backend/page/driver/add.html?id=' + st,
+                        name: '修改驾驶员'
+                    }, true)
+                }
+            },
+
+            //状态修改
+            async exportDriver() {
+                alert('导出excel')
+                var url = 'http://localhost:8080/driver/reportExport/prodTest?excelTitle=驾驶员管理'
+                window.open(url)
+            },
+
+            handleSizeChange(val) {
+                this.pageSize = val
+                this.init()
+            },
+            handleCurrentChange(val) {
+                this.page = val
+                this.init()
+            }
+        }
+    })
+</script>
+</body>
+</html>

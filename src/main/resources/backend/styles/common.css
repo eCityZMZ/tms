@@ -35,6 +35,11 @@ a:hover {
   color: #419eff !important;
   position: relative;
 }
+
+.bianji {
+  color: #419eff !important;
+}
+
 .blueBug::after {
   content: "";
   position: absolute;
